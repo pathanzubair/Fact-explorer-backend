@@ -46,27 +46,39 @@ router.delete('/:id', async (req, res) => {
 
 // 🟢 FETCH NEWS API (Your Dynamic Feature)
 router.post('/fetch-news', async (req, res) => {
-  try {
-    const apiKey = 'aabe5b1f108c46f4be78cdac1da11b6e'; 
-// This forces the news to be about IP *AND* legal action (stricter)
-    const url = `https://newsapi.org/v2/everything?q=("intellectual property" OR patent OR trademark) AND (lawsuit OR infringement OR filing)&language=en&sortBy=publishedAt&apiKey=${apiKey}`;    
-    const response = await axios.get(url);
-    const articles = response.data.articles.slice(0, 5);
+    try {
+        // 🟢 Specific IPR categories to replace the generic "News" tag
+        const categories = [
+            { type: 'Patent', query: 'latest technology patent innovation' },
+            { type: 'Trademark', query: 'famous brand trademark filing' },
+            { type: 'Copyright', query: 'entertainment industry copyright law' }
+        ];
 
-    const newFacts = articles.map(article => ({
-      title: article.title,
-      description: article.description || "No description available.",
-      ipr_type: "News",
-      domain: "General",
-      year: new Date(article.publishedAt).getFullYear(),
-      source: article.source.name
-    }));
+        // Randomly pick one so the site feels dynamic
+        const selected = categories[Math.floor(Math.random() * categories.length)];
 
-    await Fact.insertMany(newFacts);
-    res.json({ message: `Success! Added ${newFacts.length} live news articles.` });
-  } catch (err) {
-    res.status(500).json({ message: "Failed to fetch from web", error: err.message });
-  }
+        const response = await axios.get(`https://newsapi.org/v2/everything?q=${selected.query}&apiKey=YOUR_NEWS_API_KEY`);
+
+        const iprItems = response.data.articles.slice(0, 5).map(article => ({
+            title: article.title,
+            description: article.description || "Detailed IPR information coming soon.",
+            ipr_type: selected.type, // 🟢 This replaces "News" with Patent/Trademark/Copyright
+            domain: "Legal", 
+            year: 2026,
+            source: article.url
+        }));
+
+        // 🟢 'ordered: false' prevents the "Failed" error if a duplicate title is found
+        await Fact.insertMany(iprItems, { ordered: false });
+        
+        res.status(200).json({ message: `Successfully fetched new ${selected.type} facts!` });
+    } catch (error) {
+        // Handle unique constraint (duplicate) errors gracefully
+        if (error.code === 11000) {
+            return res.status(200).json({ message: "Fetched, but all items were already in the database." });
+        }
+        res.status(500).json({ error: error.message });
+    }
 });
 
 // RESET DB
