@@ -47,35 +47,36 @@ router.delete('/:id', async (req, res) => {
 // 🟢 FETCH NEWS API (Your Dynamic Feature)
 router.post('/fetch-news', async (req, res) => {
     try {
-        // 🟢 Specific IPR categories to replace the generic "News" tag
-        const categories = [
-            { type: 'Patent', query: 'latest technology patent innovation' },
-            { type: 'Trademark', query: 'famous brand trademark filing' },
-            { type: 'Copyright', query: 'entertainment industry copyright law' }
+        // 🟢 Specific IPR categories to replace "News"
+        const iprOptions = [
+            { type: 'Patent', query: 'latest breakthrough technology patent' },
+            { type: 'Trademark', query: 'iconic fashion brand trademark' },
+            { type: 'Copyright', query: 'famous movie character copyright law' }
         ];
 
-        // Randomly pick one so the site feels dynamic
-        const selected = categories[Math.floor(Math.random() * categories.length)];
+        // Randomly pick one for true dynamic content
+        const selected = iprOptions[Math.floor(Math.random() * iprOptions.length)];
 
-        const response = await axios.get(`https://newsapi.org/v2/everything?q=${selected.query}&apiKey=YOUR_NEWS_API_KEY`);
+        // Using your existing NEWS_API_KEY from .env
+        const response = await axios.get(`https://newsapi.org/v2/everything?q=${selected.query}&apiKey=${process.env.NEWS_API_KEY}`);
 
         const iprItems = response.data.articles.slice(0, 5).map(article => ({
             title: article.title,
-            description: article.description || "Detailed IPR information coming soon.",
-            ipr_type: selected.type, // 🟢 This replaces "News" with Patent/Trademark/Copyright
-            domain: "Legal", 
+            description: article.description || "IPR Details pending...",
+            ipr_type: selected.type, // 🟢 This officially replaces "News"
+            domain: selected.type === 'Patent' ? 'Tech' : 'Legal', 
             year: 2026,
             source: article.url
         }));
 
-        // 🟢 'ordered: false' prevents the "Failed" error if a duplicate title is found
+        // 🟢 The 'ordered: false' trick skips duplicates automatically
         await Fact.insertMany(iprItems, { ordered: false });
         
-        res.status(200).json({ message: `Successfully fetched new ${selected.type} facts!` });
+        res.status(200).json({ message: `Success! Added ${selected.type} facts.` });
     } catch (error) {
-        // Handle unique constraint (duplicate) errors gracefully
+        // If it's a duplicate (code 11000), don't show an error to the user
         if (error.code === 11000) {
-            return res.status(200).json({ message: "Fetched, but all items were already in the database." });
+            return res.status(200).json({ message: "Fetched, but these facts were already known!" });
         }
         res.status(500).json({ error: error.message });
     }
