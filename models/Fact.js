@@ -1,32 +1,9 @@
-const mongoose = require('mongoose');
-
-const FactSchema = new mongoose.Schema({
-  title: { type: String, required: true, trim: true },
+const factSchema = new mongoose.Schema({
+  title: { type: String, required: true, unique: true }, // 🟢 Added unique: true
   description: { type: String, required: true },
-  
-  ipr_type: { 
-    type: String, 
-    required: true, 
-    enum: ['Patent', 'Copyright', 'Trademark', 'Trade Secret', 'News'] 
-  },
-  
-  domain: { 
-    type: String, 
-    required: true, 
-    enum: ['Technology', 'Entertainment', 'Fashion', 'Food & Beverage', 'Healthcare', 'General'] 
-  },
-
-  // 🟢 NEW FIELD: REGION
-  region: {
-    type: String,
-    required: true,
-    enum: ['Global', 'North America', 'Europe', 'Asia', 'India', 'Other'],
-    default: 'Global'
-  },
-
-  year: { type: Number, required: true },
-  source: { type: String, required: true },
+  ipr_type: String,
+  domain: String,
+  year: Number,
+  source: String,
   createdAt: { type: Date, default: Date.now }
 });
-
-module.exports = mongoose.model('Fact', FactSchema);
