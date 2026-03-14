@@ -45,6 +45,7 @@ router.delete('/:id', async (req, res) => {
 });
 
 // 🟢 FETCH NEWS API (Advanced Domain-Specific IPR Facts)
+// 🟢 FETCH NEWS API (Advanced Domain-Specific IPR Facts)
 router.post('/fetch-news', async (req, res) => {
     try {
         // 1. Refined Category Clusters for 100+ Diverse Facts
@@ -58,36 +59,22 @@ router.post('/fetch-news', async (req, res) => {
             { type: 'Patent', domain: 'Healthcare', query: 'medical research patent breakthrough history' },
             { type: 'Copyright', domain: 'Healthcare', query: 'medical journal copyright law facts' },
             { type: 'Copyright', domain: 'Entertainment', query: 'famous movie music copyright history facts' },
-            { type: 'Trademark', domain: 'Entertainment', query: 'entertainment character trademark legal trivia' }
+            { type: 'Trademark', domain: 'Entertainment', query: 'entertainment character trademark legal trivia' },
             { type: 'Patent', domain: 'Technology', query: 'first software patent history facts "did you know"' },
-    { type: 'Trade Secret', domain: 'Technology', query: 'famous algorithm trade secret examples' },
-    
-    // 👗 FASHION & LUXURY
-    { type: 'Trademark', domain: 'Fashion', query: 'luxury brand trademark logo origins history' },
-    { type: 'Copyright', domain: 'Fashion', query: 'high fashion design copyright legal trivia' },
-    
-    // 🍔 FOOD & AGRICULTURE
-    { type: 'Trade Secret', domain: 'Food & Beverage', query: 'secret recipe history Coca-Cola KFC facts' },
-    { type: 'Patent', domain: 'Food & Beverage', query: 'genetically modified food patent history' },
-    
-    // 🏥 HEALTHCARE & PHARMA
-    { type: 'Patent', domain: 'Healthcare', query: 'famous life-saving medicine patent breakthrough' },
-    { type: 'Copyright', domain: 'Healthcare', query: 'medical diagram copyright legal cases' },
-    
-    // 🎬 ENTERTAINMENT & MEDIA
-    { type: 'Copyright', domain: 'Entertainment', query: 'Disney character copyright history Mickey Mouse' },
-    { type: 'Trademark', domain: 'Entertainment', query: 'famous movie title trademark legal trivia' },
-
-    // 🏎️ AUTOMOTIVE (New)
-    { type: 'Patent', domain: 'Technology', query: 'safety belt patent history Volvo facts' },
-    { type: 'Trademark', domain: 'Technology', query: 'car brand logo trademark evolution history' },
-
-    // 🎮 GAMING & TOYS (New)
-    { type: 'Copyright', domain: 'Entertainment', query: 'video game character copyright history facts' },
-    { type: 'Patent', domain: 'Technology', query: 'LEGO brick patent history interesting facts' },
-
-    // 🌿 SUSTAINABILITY (New)
-    { type: 'Patent', domain: 'Healthcare', query: 'solar panel patent history green technology' }
+            { type: 'Trade Secret', domain: 'Technology', query: 'famous algorithm trade secret examples' },
+            { type: 'Trademark', domain: 'Fashion', query: 'luxury brand trademark logo origins history' },
+            { type: 'Copyright', domain: 'Fashion', query: 'high fashion design copyright legal trivia' },
+            { type: 'Trade Secret', domain: 'Food & Beverage', query: 'secret recipe history Coca-Cola KFC facts' },
+            { type: 'Patent', domain: 'Food & Beverage', query: 'genetically modified food patent history' },
+            { type: 'Patent', domain: 'Healthcare', query: 'famous life-saving medicine patent breakthrough' },
+            { type: 'Copyright', domain: 'Healthcare', query: 'medical diagram copyright legal cases' },
+            { type: 'Copyright', domain: 'Entertainment', query: 'Disney character copyright history Mickey Mouse' },
+            { type: 'Trademark', domain: 'Entertainment', query: 'famous movie title trademark legal trivia' },
+            { type: 'Patent', domain: 'Technology', query: 'safety belt patent history Volvo facts' },
+            { type: 'Trademark', domain: 'Technology', query: 'car brand logo trademark evolution history' },
+            { type: 'Copyright', domain: 'Entertainment', query: 'video game character copyright history facts' },
+            { type: 'Patent', domain: 'Technology', query: 'LEGO brick patent history interesting facts' },
+            { type: 'Patent', domain: 'Healthcare', query: 'solar panel patent history green technology' }
         ];
 
         // 2. Randomly pick one domain/category pair per click
@@ -104,8 +91,8 @@ router.post('/fetch-news', async (req, res) => {
         const iprItems = articles.map(article => ({
             title: article.title,
             description: article.description || "Historical IPR case details available in the source link.",
-            ipr_type: selected.type, // 🟢 Correctly tags as Patent, Trademark, etc.
-            domain: selected.domain, // 🟢 Correctly tags as Healthcare, Fashion, etc.
+            ipr_type: selected.type, 
+            domain: selected.domain, 
             year: new Date(article.publishedAt).getFullYear() || 2026,
             source: article.url
         }));
@@ -116,7 +103,7 @@ router.post('/fetch-news', async (req, res) => {
         res.status(200).json({ message: `Success! Added 5 new ${selected.domain} ${selected.type} facts.` });
     } catch (error) {
         // If it's a duplicate (code 11000), skip gracefully
-        if (error.code === 11000) {
+        if (error.code === 11000 || (error.writeErrors && error.writeErrors.some(e => e.code === 11000))) {
             return res.status(200).json({ message: "Fetch complete (any duplicates were skipped)!" });
         }
         res.status(500).json({ error: error.message });
